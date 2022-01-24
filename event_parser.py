@@ -32,9 +32,12 @@ def parse_messages(messages):
     time = "12:00"
     # print([m.message for m in list(messages)])
     for mes in messages:
-        search = re.search(r"(\d{2})[:.](\d{2})", mes.message)
+        search = re.search(r"(\d{2})[:.]?(\d{2})?", mes.message)
         if search:
-            time = f"{search.group(1)}:{search.group(2)}"
+            minutes = search.group(2)
+            if minutes is None:
+                minutes = "00"
+            time = f"{search.group(1)}:{minutes}"
             print("Time parsed:", time)
             return time
     return time
