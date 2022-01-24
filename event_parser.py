@@ -1,4 +1,5 @@
 import asyncio
+import datetime
 from os import environ
 import re
 
@@ -18,8 +19,9 @@ def create_calendar_event(name: str, time: str):
     # TODO parse 5 last messages to get time
     # TODO ask for date
     e.name = "Our cool meeting"
-    e.begin = f'2021-11-08 {time}:00'
-    e.end = f'2021-11-08 {time}:00'
+    tomorrow = datetime.date.today() + datetime.timedelta(days=1)
+    e.begin = f'{tomorrow} {time}:00'
+    e.end = f'{tomorrow} {time}:00'
     c.events.add(e)
 
     with open(f'{name}.ics', 'w') as my_file:
@@ -30,11 +32,11 @@ def parse_messages(messages):
     time = "12:00"
     # print([m.message for m in list(messages)])
     for mes in messages:
-
-        search = re.search(r"\d{2}:\d{2}", mes.message)
+        search = re.search(r"(\d{2})[:.](\d{2})", mes.message)
         if search:
-            time = search.group(0)
-            break
+            time = f"{search.group(1)}:{search.group(2)}"
+            print("Time parsed:", time)
+            return time
     return time
 
 
@@ -49,8 +51,6 @@ async def main():
             event_name = 'our_cool_event'
             create_calendar_event(event_name, time)
             await client.send_file(event.peer_id.user_id, f"{event_name}.ics")
-
-
 
         await client.run_until_disconnected()
 
